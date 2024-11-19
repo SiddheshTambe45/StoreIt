@@ -6,6 +6,7 @@ import { appwriteConfig } from '../appwrite/config';
 import { parseStringify } from '../utils';
 import { cookies } from 'next/headers';
 import { avatarPlaceholderUrl } from '@/constants';
+import { redirect } from 'next/navigation';
 
 const getUserByEmail = async (email: string) => {
     const { databases } = await createAdminClient();
@@ -19,7 +20,7 @@ const getUserByEmail = async (email: string) => {
     return result.total > 0 ? result.documents[0] : null;
 };
 
-const handleError = (error: unknown, message: string) => {
+const handleError = async (error: unknown, message: string) => {
     console.log(error, message);
     throw error;
 };
@@ -29,8 +30,6 @@ export const sendEmailOtp = async ({ email }: { email: string }) => {
 
     try {
         const session = await account.createEmailToken(ID.unique(), email);
-
-        console.log(session.userId);
 
         return session.userId;
     } catch (error) {
@@ -45,29 +44,33 @@ export const createAccount = async ({
     fullName: string;
     email: string;
 }) => {
-    const existingAccount = await getUserByEmail(email);
+    try {
+        const existingAccount = await getUserByEmail(email);
 
-    const accountId = await sendEmailOtp({ email });
+        const accountId = await sendEmailOtp({ email });
 
-    if (!accountId) throw new Error('Failed to send an OTP');
+        if (!accountId) throw new Error('Failed to send an OTP');
 
-    if (!existingAccount) {
-        const { databases } = await createAdminClient();
+        if (!existingAccount) {
+            const { databases } = await createAdminClient();
 
-        await databases.createDocument(
-            appwriteConfig.databaseId,
-            appwriteConfig.usersCollectionId,
-            ID.unique(),
-            {
-                fullName,
-                email,
-                avatar: avatarPlaceholderUrl,
-                accountId,
-            },
-        );
+            await databases.createDocument(
+                appwriteConfig.databaseId,
+                appwriteConfig.usersCollectionId,
+                ID.unique(),
+                {
+                    fullName,
+                    email,
+                    avatar: avatarPlaceholderUrl,
+                    accountId,
+                },
+            );
+        }
+
+        return parseStringify({ accountId });
+    } catch (error) {
+        return parseStringify({ error });
     }
-
-    return parseStringify({ accountId });
 };
 
 export const verifySecret = async ({
@@ -109,4 +112,32 @@ export const getCurrentUser = async () => {
     if (user.total <= 0) return null;
 
     return parseStringify(user.documents[0]);
+};
+
+export const signOutUser = async () => {
+    const { account } = await createSessionClient();
+    try {
+        await account.deleteSession('current');
+        (await cookies()).delete('appwrite-session');
+    } catch (error) {
+        handleError(error, 'Failed to sign out user');
+    } finally {
+        redirect('/sign-in');
+    }
+};
+
+export const signInUser = async ({ email }: { email: string }) => {
+    try {
+        const existingUser = await getUserByEmail(email);
+
+        if (existingUser) {
+            await sendEmailOtp({ email });
+
+            return parseStringify({ accountId: existingUser.accountId });
+        }
+
+        return parseStringify({ accountId: null, error: 'User not found' });
+    } catch (error) {
+        handleError(error, 'Failed to sign in user');
+    }
 };
