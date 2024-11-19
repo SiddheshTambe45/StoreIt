@@ -14,7 +14,7 @@ import { usePathname } from 'next/navigation';
 interface Props {
     ownerId: string;
     accountId: string;
-    className: string;
+    className?: string;
 }
 
 const FileUploader = ({ ownerId, accountId, className }: Props) => {
