@@ -103,6 +103,8 @@ const FileUploader = ({ ownerId, accountId, className }: Props) => {
                         );
                     }
                 } catch (error) {
+                    console.log(error);
+
                     toast({
                         description: `Failed to upload ${file.name}`,
                         className: 'error-toast',
