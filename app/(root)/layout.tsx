@@ -9,8 +9,10 @@ import { Toaster } from '@/components/ui/toaster';
 const Layout = async ({ children }: { children: React.ReactNode }) => {
     const currentUser = await getCurrentUser();
 
-    if (!currentUser) return redirect('/sign-in');
-
+    if (!currentUser) {
+        redirect('/sign-in');
+        return null; // Explicit return to prevent further rendering
+    }
     return (
         <main className="flex h-screen">
             <Sidebar {...currentUser} />
