@@ -123,8 +123,18 @@ export const getCurrentUser = async () => {
 };
 
 export const signOutUser = async () => {
-    const { account } = await createSessionClient();
+    const client = await createSessionClient();
+
+    // Check if the client is null
+    if (!client) {
+        redirect('/sign-in'); // Redirect to sign-in page if no session exists
+        return;
+    }
+
+    // const { account } = await createSessionClient();
+
     try {
+        const { account } = client; // Safely destructure after the null check
         await account.deleteSession('current');
         (await cookies()).delete('appwrite-session');
     } catch (error) {
