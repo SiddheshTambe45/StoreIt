@@ -13,7 +13,7 @@ export const createSessionClient = async () => {
 
     // if (!session || !session.value) throw new Error('No session');
 
-    if (!session || !session.value) {
+    if (!session) {
         return null; // Return null if no session
     }
 

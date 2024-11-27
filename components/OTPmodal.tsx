@@ -18,7 +18,7 @@ import Image from 'next/image';
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { sendEmailOtp, verifySecret } from '@/lib/actions/user.actions';
-import { redirect, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 const OTPmodal = ({
     accountId,
@@ -47,7 +47,7 @@ const OTPmodal = ({
 
             console.log('sssss', sessionId);
 
-            if ({ sessionId }) router.push('/');
+            if (sessionId) router.push('/');
         } catch (error) {
             console.log('Failed to submit OTP', error);
         } finally {
