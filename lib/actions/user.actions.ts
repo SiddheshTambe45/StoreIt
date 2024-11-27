@@ -123,12 +123,31 @@ export const verifySecret = async ({
 //     return parseStringify(user.documents[0]);
 // };
 
+// export const getCurrentUser = async () => {
+//     try {
+//         const { databases, account } = await createSessionClient();
+
+//         const result = await account.get();
+
+//         const user = await databases.listDocuments(
+//             appwriteConfig.databaseId,
+//             appwriteConfig.usersCollectionId,
+//             [Query.equal('accountId', result.$id)],
+//         );
+
+//         if (user.total <= 0) return null;
+
+//         return parseStringify(user.documents[0]);
+//     } catch (error) {
+//         console.log(error);
+//     }
+// };
+
 export const getCurrentUser = async () => {
     try {
         const { databases, account } = await createSessionClient();
 
         const result = await account.get();
-
         const user = await databases.listDocuments(
             appwriteConfig.databaseId,
             appwriteConfig.usersCollectionId,
@@ -139,7 +158,8 @@ export const getCurrentUser = async () => {
 
         return parseStringify(user.documents[0]);
     } catch (error) {
-        console.log(error);
+        console.error('Error fetching current user:', error);
+        return null; // Ensure null is returned on error
     }
 };
 
