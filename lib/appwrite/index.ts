@@ -30,24 +30,31 @@ import { cookies } from 'next/headers';
 // };
 
 export const createSessionClient = async () => {
-    const client = new Client()
-        .setEndpoint(appwriteConfig.endpointUrl)
-        .setProject(appwriteConfig.projectId);
+    try {
+        const client = new Client()
+            .setEndpoint(appwriteConfig.endpointUrl)
+            .setProject(appwriteConfig.projectId);
 
-    const session = (await cookies()).get('appwrite-session');
+        const session = (await cookies()).get('appwrite-session');
 
-    if (!session || !session.value) throw new Error('No session');
+        if (!session || !session.value) throw new Error('No session');
 
-    client.setSession(session.value);
+        console.log('server log 4');
 
-    return {
-        get account() {
-            return new Account(client);
-        },
-        get databases() {
-            return new Databases(client);
-        },
-    };
+        client.setSession(session.value);
+
+        return {
+            get account() {
+                return new Account(client);
+            },
+            get databases() {
+                return new Databases(client);
+            },
+        };
+    } catch (error) {
+        console.log(error, 'server log 3');
+        return null;
+    }
 };
 
 export const createAdminClient = async () => {
