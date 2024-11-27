@@ -13,7 +13,9 @@ export const createSessionClient = async () => {
 
     // if (!session || !session.value) throw new Error('No session');
 
-    if (!session) {
+    if (!session || !session.value) {
+        console.log('problem');
+
         return null; // Return null if no session
     }
 

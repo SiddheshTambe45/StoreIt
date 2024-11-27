@@ -91,7 +91,6 @@ export const verifySecret = async ({
             httpOnly: true,
             secure: true,
             sameSite: 'strict',
-            maxAge: 60 * 60 * 60 * 60,
         });
 
         console.log('all good this side also');
