@@ -36,11 +36,18 @@ const OTPmodal = ({
         e.preventDefault();
         setIsLoading(true);
 
-        const sessionId = await verifySecret({ accountId, password });
+        // const sessionId = await verifySecret({ accountId, password });
 
-        if (sessionId) router.push('/');
+        // console.log('sssss');
+
+        // if (sessionId) router.push('/');
 
         try {
+            const sessionId = await verifySecret({ accountId, password });
+
+            console.log('sssss', sessionId);
+
+            if (sessionId) router.push('/');
             console.log('OTP verification successfull');
         } catch (error) {
             console.log('Failed to submit OTP', error);

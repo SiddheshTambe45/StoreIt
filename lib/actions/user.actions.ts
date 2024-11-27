@@ -93,6 +93,8 @@ export const verifySecret = async ({
             sameSite: 'strict',
         });
 
+        console.log('all good this side also');
+
         return parseStringify({ sessionId: session.$id });
     } catch (error) {
         console.log(error, 'Failed to verify OTP');
@@ -202,9 +204,12 @@ export const signInUser = async ({ email }: { email: string }) => {
 
         if (existingUser) {
             await sendEmailOtp({ email });
+            console.log('all good so far');
 
             return parseStringify({ accountId: existingUser.accountId });
         }
+
+        console.log('signed-inn');
 
         return parseStringify({ accountId: null, error: 'User not found' });
     } catch (error) {
