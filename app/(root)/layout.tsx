@@ -54,7 +54,7 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
     try {
         const currentUser = await getCurrentUser();
 
-        if (!currentUser) {
+        if (typeof window === 'undefined' && !currentUser) {
             // Explicit redirection if no currentUser
             return redirect('/sign-in');
         }
