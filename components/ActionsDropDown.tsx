@@ -31,7 +31,12 @@ import {
 import { usePathname } from 'next/navigation';
 import { FileDetails, ShareInput } from './ActionModalContent';
 
-const ActionsDropDown = ({ file }: { file: Models.Document }) => {
+interface ActionDropDownProps {
+    file: Models.Document;
+    currentUser: null | Models.Document;
+}
+
+const ActionsDropDown = ({ file, currentUser }: ActionDropDownProps) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDropDownOpen, setIsDropDownOpen] = useState(false);
     const [action, setAction] = useState<ActionType | null>(null);
@@ -39,6 +44,8 @@ const ActionsDropDown = ({ file }: { file: Models.Document }) => {
     const [isLoading, setIsLoading] = useState(false);
     const path = usePathname();
     const [emails, setEmails] = useState<string[]>([]);
+
+    const isOwner = currentUser?.accountId === file.accountId;
 
     const closeAllModals = () => {
         setIsModalOpen(false);
@@ -62,18 +69,21 @@ const ActionsDropDown = ({ file }: { file: Models.Document }) => {
                     name,
                     extension: file.extension,
                     path,
+                    accountId: file.accountId,
                 }),
             share: () =>
                 updateFileUsers({
                     fileId: file.$id,
                     emails,
                     path,
+                    accountId: file.accountId,
                 }),
             delete: () =>
                 deleteFile({
                     fileId: file.$id,
                     bucketFileId: file.bucketFileId,
                     path,
+                    accountId: file.accountId,
                 }),
         };
 
@@ -90,6 +100,7 @@ const ActionsDropDown = ({ file }: { file: Models.Document }) => {
             fileId: file.$id,
             emails,
             path,
+            accountId: file.accountId,
         });
 
         if (success) setEmails(updatedEmails);
@@ -183,7 +194,7 @@ const ActionsDropDown = ({ file }: { file: Models.Document }) => {
                     {actionsDropdownItems.map((actionItem) => (
                         <DropdownMenuItem
                             key={actionItem.value}
-                            className="shad-dropdown-item"
+                            className={`shad-dropdown-item`}
                             onClick={() => {
                                 setAction(actionItem);
                                 if (
@@ -215,7 +226,9 @@ const ActionsDropDown = ({ file }: { file: Models.Document }) => {
                                     {actionItem.label}
                                 </Link>
                             ) : (
-                                <div className="flex items-center gap-2">
+                                <div
+                                    className={`flex items-center gap-2 ${!isOwner && actionItem.value !== 'details' && 'hidden'}`}
+                                >
                                     <Image
                                         src={actionItem.icon}
                                         alt={actionItem.label}

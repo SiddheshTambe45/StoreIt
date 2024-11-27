@@ -242,3 +242,16 @@ export const getFileTypesParams = (type: string) => {
             return ['document'];
     }
 };
+
+// const checkOwnership = async (fileId: string) => {
+//     const { databases } = await createAdminClient();
+
+//     // Fetch the file document by ID
+//     const file = await databases.getDocument(
+//         appwriteConfig.databaseId,
+//         appwriteConfig.filesCollectionId,
+//         fileId,
+//     );
+
+//     return file.owner; // Return the owner ID of the file
+// };
