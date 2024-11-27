@@ -15,7 +15,7 @@ const Dashboard = async () => {
     const currentUser = await getCurrentUser();
 
     // If the user is not authenticated, early return and don't load the rest of the data
-    if (typeof window === 'undefined' && !currentUser) {
+    if (!currentUser) {
         console.log('are bhau 2222');
         // This will redirect the user to the sign-in page
         redirect('/sign-in');

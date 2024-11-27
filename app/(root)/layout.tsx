@@ -14,7 +14,7 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
     //     return null; // Explicit return to prevent further rendering
     // }
 
-    if (typeof window === 'undefined' && !currentUser) {
+    if (!currentUser) {
         console.log('are bhau');
         redirect('/sign-in');
         return null;

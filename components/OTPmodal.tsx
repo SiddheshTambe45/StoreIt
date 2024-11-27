@@ -49,7 +49,7 @@ const OTPmodal = ({
 
             // if (sessionId) router.push('/');
 
-            console.log(sessionId);
+            console.log({ sessionId });
             if (sessionId) {
                 // Session is valid, proceed to redirect
                 console.log('Session found, redirecting...');

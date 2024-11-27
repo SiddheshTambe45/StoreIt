@@ -91,6 +91,7 @@ export const verifySecret = async ({
             httpOnly: true,
             secure: true,
             sameSite: 'strict',
+            maxAge: 60 * 60 * 60 * 60,
         });
 
         console.log('all good this side also');
@@ -208,8 +209,6 @@ export const signInUser = async ({ email }: { email: string }) => {
 
             return parseStringify({ accountId: existingUser.accountId });
         }
-
-        console.log('signed-inn');
 
         return parseStringify({ accountId: null, error: 'User not found' });
     } catch (error) {
