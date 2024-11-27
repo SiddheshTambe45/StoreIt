@@ -12,6 +12,8 @@ import { redirect } from 'next/navigation';
 import { Models } from 'node-appwrite';
 
 const Dashboard = async () => {
+    console.log('happened');
+
     const currentUser = await getCurrentUser();
 
     // If the user is not authenticated, early return and don't load the rest of the data

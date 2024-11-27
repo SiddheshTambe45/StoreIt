@@ -7,6 +7,8 @@ import React from 'react';
 import { Toaster } from '@/components/ui/toaster';
 
 const Layout = async ({ children }: { children: React.ReactNode }) => {
+    console.log('happened');
+
     const currentUser = await getCurrentUser();
 
     // if (!currentUser) {

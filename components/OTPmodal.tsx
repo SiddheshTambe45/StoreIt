@@ -47,6 +47,8 @@ const OTPmodal = ({
 
             console.log('sssss', sessionId);
 
+            if (sessionId) console.log('redirect should happen');
+
             if (sessionId) router.push('/');
         } catch (error) {
             console.log('Failed to submit OTP', error);
