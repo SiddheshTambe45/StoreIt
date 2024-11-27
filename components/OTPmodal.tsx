@@ -45,19 +45,9 @@ const OTPmodal = ({
         try {
             const sessionId = await verifySecret({ accountId, password });
 
-            // console.log('sssss', sessionId);
+            console.log('sssss', sessionId);
 
-            // if (sessionId) router.push('/');
-
-            console.log({ sessionId });
-            if (sessionId) {
-                // Session is valid, proceed to redirect
-                console.log('Session found, redirecting...');
-                redirect('/');
-            } else {
-                console.log('Session not found');
-            }
-            console.log('OTP verification successfull');
+            if ({ sessionId }) router.push('/');
         } catch (error) {
             console.log('Failed to submit OTP', error);
         } finally {

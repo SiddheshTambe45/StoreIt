@@ -149,11 +149,8 @@ export const verifySecret = async ({
 export const getCurrentUser = async () => {
     try {
         const sessionClient = await createSessionClient();
-        console.log('server log 1');
 
         if (!sessionClient) {
-            console.log('server log 2');
-
             return null; // No session, return null
         }
 
