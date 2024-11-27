@@ -12,7 +12,7 @@ import { redirect } from 'next/navigation';
 import { Models } from 'node-appwrite';
 
 const Dashboard = async () => {
-    console.log('happened');
+    alert('reached');
 
     const currentUser = await getCurrentUser();
 
