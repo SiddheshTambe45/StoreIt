@@ -14,16 +14,9 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
     //     return null; // Explicit return to prevent further rendering
     // }
 
-    // if (!currentUser) {
-    //     console.log('are bhau');
-    //     redirect('/sign-in');
-    //     return null;
-    // }
-
-    // Redirect if no user is logged in
-    if (!currentUser) {
-        redirect('https://www.google.com');
-        // return null;
+    if (typeof window === 'undefined' && !currentUser) {
+        redirect('/sign-in');
+        return null;
     }
 
     // if (!currentUser) return redirect('/sign-in');

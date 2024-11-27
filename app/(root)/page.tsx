@@ -15,12 +15,10 @@ const Dashboard = async () => {
     const currentUser = await getCurrentUser();
 
     // If the user is not authenticated, early return and don't load the rest of the data
-    if (!currentUser) {
-        console.log('are bhau 2222');
-        redirect('https://www.google.com');
+    if (typeof window === 'undefined' && !currentUser) {
         // This will redirect the user to the sign-in page
-        // redirect('/sign-in');
-        // return null; // Return null to stop rendering the dashboard
+        redirect('/sign-in');
+        return null; // Return null to stop rendering the dashboard
     }
 
     const [files, totalSpaceUsed] = await Promise.all([
