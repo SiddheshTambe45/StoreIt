@@ -7,7 +7,6 @@ import React from 'react';
 import { Toaster } from '@/components/ui/toaster';
 
 const Layout = async ({ children }: { children: React.ReactNode }) => {
-    alert('reached');
     const currentUser = await getCurrentUser();
 
     // if (!currentUser) {
@@ -15,10 +14,16 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
     //     return null; // Explicit return to prevent further rendering
     // }
 
+    // if (!currentUser) {
+    //     console.log('are bhau');
+    //     redirect('/sign-in');
+    //     return null;
+    // }
+
+    // Redirect if no user is logged in
     if (!currentUser) {
-        console.log('are bhau');
-        redirect('/sign-in');
-        return null;
+        redirect('https://www.google.com');
+        // return null;
     }
 
     // if (!currentUser) return redirect('/sign-in');
