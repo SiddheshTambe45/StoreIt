@@ -18,7 +18,7 @@ import Image from 'next/image';
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { sendEmailOtp, verifySecret } from '@/lib/actions/user.actions';
-import { useRouter } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 
 const OTPmodal = ({
     accountId,
@@ -53,7 +53,7 @@ const OTPmodal = ({
             if (sessionId) {
                 // Session is valid, proceed to redirect
                 console.log('Session found, redirecting...');
-                router.push('/');
+                redirect('/');
             } else {
                 console.log('Session not found');
             }
