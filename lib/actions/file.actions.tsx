@@ -4,12 +4,7 @@ import { createAdminClient, createSessionClient } from '../appwrite';
 import { InputFile } from 'node-appwrite/file';
 import { appwriteConfig } from '../appwrite/config';
 import { ID, Models, Query } from 'node-appwrite';
-import {
-    constructFileUrl,
-    convertFileSize,
-    getFileType,
-    parseStringify,
-} from '../utils';
+import { constructFileUrl, getFileType, parseStringify } from '../utils';
 import { revalidatePath } from 'next/cache';
 import { getCurrentUser } from './user.actions';
 
@@ -27,6 +22,24 @@ export const uploadFile = async ({
     const { storage, databases } = await createAdminClient();
 
     try {
+        // Fetch the user data to get the current usedStorage
+        const userDocument = await databases.getDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.usersCollectionId,
+            ownerId,
+        );
+
+        const usedStorage = userDocument.usedStorage || 0; // Get the current usedStorage, default to 0 if undefined
+        const maxStorageLimit = 75 * 1024 * 1024; // 75MB in bytes
+        const newFileSize = file.size; // Size of the file being uploaded
+
+        // Check if the user exceeds the storage limit
+        if (usedStorage + newFileSize > maxStorageLimit) {
+            throw new Error(
+                'Storage limit exceeded. Please delete some files before uploading new ones.',
+            );
+        }
+
         const inputFile = InputFile.fromBuffer(file, file.name);
 
         const bucketFile = await storage.createFile(
@@ -61,6 +74,16 @@ export const uploadFile = async ({
                 );
                 handleError(error, 'Failed to create file document');
             });
+
+        // Update the usedStorage field of the user document
+        await databases.updateDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.usersCollectionId,
+            ownerId,
+            {
+                usedStorage: usedStorage + newFileSize, // Add the new file size to the usedStorage
+            },
+        );
 
         revalidatePath(path);
 
@@ -206,6 +229,44 @@ export const updateFileUsers = async ({
     }
 };
 
+// export const deleteFile = async ({
+//     fileId,
+//     bucketFileId,
+//     path,
+//     accountId,
+// }: DeleteFileProps) => {
+//     const { databases, storage } = await createAdminClient();
+
+//     // check if owner is doing this else don't allow
+
+//     try {
+//         const currentuser = await getCurrentUser();
+
+//         if (!currentuser) throw new Error('User not found');
+
+//         if (currentuser.accountId !== accountId)
+//             throw new Error(
+//                 "User is not the owner of file, can't rename the file",
+//             );
+
+//         const deletedFile = await databases.deleteDocument(
+//             appwriteConfig.databaseId,
+//             appwriteConfig.filesCollectionId,
+//             fileId,
+//         );
+
+//         if (deletedFile) {
+//             await storage.deleteFile(appwriteConfig.bucketId, bucketFileId);
+//         }
+
+//         revalidatePath(path);
+
+//         return parseStringify({ status: 'success' });
+//     } catch (error) {
+//         handleError(error, 'Failed to rename the file');
+//     }
+// };
+
 export const deleteFile = async ({
     fileId,
     bucketFileId,
@@ -214,8 +275,6 @@ export const deleteFile = async ({
 }: DeleteFileProps) => {
     const { databases, storage } = await createAdminClient();
 
-    // check if owner is doing this else don't allow
-
     try {
         const currentuser = await getCurrentUser();
 
@@ -223,9 +282,22 @@ export const deleteFile = async ({
 
         if (currentuser.accountId !== accountId)
             throw new Error(
-                "User is not the owner of file, can't rename the file",
+                "User is not the owner of file, can't delete the file",
             );
 
+        // Fetch the file document to get the file size
+        const fileDocument = await databases.getDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.filesCollectionId,
+            fileId,
+        );
+
+        // Check if the file exists and if it belongs to the current user
+        if (!fileDocument || fileDocument.owner !== accountId) {
+            throw new Error('File not found or unauthorized');
+        }
+
+        // Delete the file document from the database
         const deletedFile = await databases.deleteDocument(
             appwriteConfig.databaseId,
             appwriteConfig.filesCollectionId,
@@ -233,14 +305,36 @@ export const deleteFile = async ({
         );
 
         if (deletedFile) {
+            // Delete the file from storage
             await storage.deleteFile(appwriteConfig.bucketId, bucketFileId);
+
+            // Now, after successful deletion, update the user's usedStorage
+            const userDoc = await databases.getDocument(
+                appwriteConfig.databaseId,
+                appwriteConfig.usersCollectionId,
+                currentuser.accountId,
+            );
+
+            // Subtract the deleted file's size from usedStorage
+            const updatedUsedStorage = userDoc.usedStorage - fileDocument.size;
+
+            // Update the user's usedStorage in the database
+            await databases.updateDocument(
+                appwriteConfig.databaseId,
+                appwriteConfig.usersCollectionId,
+                userDoc.$id, // User document ID
+                {
+                    usedStorage: updatedUsedStorage,
+                },
+            );
         }
 
+        // Revalidate the path if necessary
         revalidatePath(path);
 
         return parseStringify({ status: 'success' });
     } catch (error) {
-        handleError(error, 'Failed to rename the file');
+        handleError(error, 'Failed to delete the file');
     }
 };
 
@@ -336,51 +430,51 @@ export const deleteFile = async ({
 //     }
 // };
 
-export const fetchFileSizes = async (fileTypes: FileType[] = []) => {
-    try {
-        // Fetch the current user data once before mapping over file types
-        const currentUser = await getCurrentUser();
-        if (!currentUser) throw new Error('User not found');
+// export const fetchFileSizes = async (fileTypes: FileType[] = []) => {
+//     try {
+//         // Fetch the current user data once before mapping over file types
+//         const currentUser = await getCurrentUser();
+//         if (!currentUser) throw new Error('User not found');
 
-        // Calculate sizes for each file type in parallel
-        const sizePromises = fileTypes.map(async (type) => {
-            let spaceUsed = 0;
-            currentUser.files.forEach((file: Models.Document) => {
-                if (file.type === type) {
-                    spaceUsed += file.size;
-                }
-            });
+//         // Calculate sizes for each file type in parallel
+//         const sizePromises = fileTypes.map(async (type) => {
+//             let spaceUsed = 0;
+//             currentUser.files.forEach((file: Models.Document) => {
+//                 if (file.type === type) {
+//                     spaceUsed += file.size;
+//                 }
+//             });
 
-            return { type, size: spaceUsed }; // Return the raw size for each file type
-        });
+//             return { type, size: spaceUsed }; // Return the raw size for each file type
+//         });
 
-        // Wait for all sizes to resolve
-        const sizes = await Promise.all(sizePromises);
+//         // Wait for all sizes to resolve
+//         const sizes = await Promise.all(sizePromises);
 
-        // Aggregate sizes into a key-value pair, no special grouping logic
-        const aggregatedSizes = sizes.reduce(
-            (acc, { type, size }) => {
-                acc[type] = size; // Store each file type's size
-                return acc;
-            },
-            {} as Record<string, number>, // Store sizes as numbers (not formatted)
-        );
+//         // Aggregate sizes into a key-value pair, no special grouping logic
+//         const aggregatedSizes = sizes.reduce(
+//             (acc, { type, size }) => {
+//                 acc[type] = size; // Store each file type's size
+//                 return acc;
+//             },
+//             {} as Record<string, number>, // Store sizes as numbers (not formatted)
+//         );
 
-        // Convert byte sizes into human-readable format (e.g., MB, GB)
-        const formattedSizes = Object.keys(aggregatedSizes).reduce(
-            (acc, key) => {
-                acc[key] = convertFileSize(aggregatedSizes[key]);
-                return acc;
-            },
-            {} as Record<string, string>, // Convert raw size into a human-readable format
-        );
+//         // Convert byte sizes into human-readable format (e.g., MB, GB)
+//         const formattedSizes = Object.keys(aggregatedSizes).reduce(
+//             (acc, key) => {
+//                 acc[key] = convertFileSize(aggregatedSizes[key]);
+//                 return acc;
+//             },
+//             {} as Record<string, string>, // Convert raw size into a human-readable format
+//         );
 
-        return formattedSizes; // Return the formatted sizes
-    } catch (error) {
-        handleError(error, 'Failed to fetch file sizes');
-        return {};
-    }
-};
+//         return formattedSizes; // Return the formatted sizes
+//     } catch (error) {
+//         handleError(error, 'Failed to fetch file sizes');
+//         return {};
+//     }
+// };
 
 export const getTotalSpaceUsed = async () => {
     try {
@@ -406,7 +500,7 @@ export const getTotalSpaceUsed = async () => {
             audio: { size: 0, latestDate: '' },
             other: { size: 0, latestDate: '' },
             used: 0,
-            all: 2 * 1024 * 1024 * 1024 /* 2GB available bucket storage */,
+            all: 75 * 1024 * 1024, // 75MB available bucket storage
         };
 
         files.documents.forEach((file) => {

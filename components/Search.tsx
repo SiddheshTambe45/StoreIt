@@ -115,7 +115,7 @@ const Search = () => {
                                             url={file.url}
                                             className="size-9 min-w-9"
                                         />
-                                        <p className="subtitle-2 line-clamp-1 text-light=100">
+                                        <p className="subtitle-2 line-clamp-1 text-light-100">
                                             {file.name}
                                         </p>
                                     </div>

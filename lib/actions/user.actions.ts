@@ -63,6 +63,7 @@ export const createAccount = async ({
                     email,
                     avatar: avatarPlaceholderUrl,
                     accountId,
+                    usedStorage: 0, // Initialize usedStorage to 0
                 },
             );
         }

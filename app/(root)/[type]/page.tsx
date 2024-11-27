@@ -1,10 +1,6 @@
 import Card from '@/components/Card';
 import Sort from '@/components/Sort';
-import {
-    fetchFileSizes,
-    getFiles,
-    getTotalSpaceUsed,
-} from '@/lib/actions/file.actions';
+import { getFiles, getTotalSpaceUsed } from '@/lib/actions/file.actions';
 import { getCurrentUser } from '@/lib/actions/user.actions';
 import { convertFileSize, getFileTypesParams } from '@/lib/utils';
 import { Models } from 'node-appwrite';
