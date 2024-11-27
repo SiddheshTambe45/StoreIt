@@ -150,6 +150,8 @@ export const getCurrentUser = async () => {
         const sessionClient = await createSessionClient();
 
         if (!sessionClient) {
+            console.log('NO session found');
+
             return null; // No session, return null
         }
 

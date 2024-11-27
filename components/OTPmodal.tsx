@@ -45,13 +45,9 @@ const OTPmodal = ({
         try {
             const sessionId = await verifySecret({ accountId, password });
 
-            console.log('sssss', sessionId);
-
-            if (sessionId) console.log('redirect should happen');
+            console.log('sssss', { sessionId });
 
             if (sessionId) {
-                console.log(2 * 2 * 2 * 2 * 2 * 2);
-
                 router.push('/');
             }
         } catch (error) {
