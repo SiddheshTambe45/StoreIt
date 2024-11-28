@@ -8,7 +8,7 @@ import { getCurrentUser } from '@/lib/actions/user.actions';
 import { convertFileSize, getUsageSummary } from '@/lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
-// import { redirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { Models } from 'node-appwrite';
 
 export const dynamic = 'force-dynamic';
@@ -16,12 +16,12 @@ export const dynamic = 'force-dynamic';
 const Dashboard = async () => {
     const currentUser = await getCurrentUser();
 
-    // // If the user is not authenticated, early return and don't load the rest of the data
-    // if (typeof window === 'undefined' && !currentUser) {
-    //     // This will redirect the user to the sign-in page
-    //     redirect('/sign-in');
-    //     return null; // Return null to stop rendering the dashboard
-    // }
+    // If the user is not authenticated, early return and don't load the rest of the data
+    if (typeof window === 'undefined' && !currentUser) {
+        // This will redirect the user to the sign-in page
+        redirect('/sign-in');
+        return null; // Return null to stop rendering the dashboard
+    }
 
     const [files, totalSpaceUsed] = await Promise.all([
         getFiles({ types: [], limit: 10 }),
