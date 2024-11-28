@@ -11,6 +11,8 @@ import Link from 'next/link';
 // import { redirect } from 'next/navigation';
 import { Models } from 'node-appwrite';
 
+export const dynamic = 'force-dynamic';
+
 const Dashboard = async () => {
     const currentUser = await getCurrentUser();
 
