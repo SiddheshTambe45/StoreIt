@@ -90,7 +90,7 @@ export const verifySecret = async ({
             path: '/',
             httpOnly: true,
             secure: true,
-            sameSite: 'strict',
+            sameSite: 'lax',
             expires: new Date(Date.now() + 60 * 60 * 24 * 7 * 1000), // 1 week
         });
 
