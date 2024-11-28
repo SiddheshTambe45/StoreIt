@@ -48,7 +48,7 @@ const OTPmodal = ({
             console.log('sssss', { sessionId });
 
             if (sessionId) {
-                router.push('/');
+                router.replace('/');
             }
         } catch (error) {
             console.log('Failed to submit OTP', error);

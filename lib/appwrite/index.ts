@@ -19,16 +19,20 @@ export const createSessionClient = async () => {
         return null; // Return null if no session
     }
 
-    client.setSession(session.value);
-
-    return {
-        get account() {
-            return new Account(client);
-        },
-        get databases() {
-            return new Databases(client);
-        },
-    };
+    try {
+        client.setSession(session.value);
+        return {
+            get account() {
+                return new Account(client);
+            },
+            get databases() {
+                return new Databases(client);
+            },
+        };
+    } catch (error) {
+        console.error('Error setting session:', error);
+        return null;
+    }
 };
 
 // export const createSessionClient = async () => {

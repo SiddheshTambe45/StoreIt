@@ -91,6 +91,7 @@ export const verifySecret = async ({
             httpOnly: true,
             secure: true,
             sameSite: 'strict',
+            expires: new Date(Date.now() + 60 * 60 * 24 * 7 * 1000), // 1 week
         });
 
         console.log('all good this side also');
@@ -160,6 +161,7 @@ export const getCurrentUser = async () => {
         const { databases, account } = sessionClient;
 
         const result = await account.get();
+
         const user = await databases.listDocuments(
             appwriteConfig.databaseId,
             appwriteConfig.usersCollectionId,
